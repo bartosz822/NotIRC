@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Channel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="channel" style="display: none">
+    <div id="chatControls">
+        <input id="message" placeholder="Type your message">
+        <button id="send">Send</button>
+        <button id="leave">Leave Channel</button>
+    </div>
+    <ul id="userlist"> <!-- Built by JS --> </ul>
+    <div id="chat">    <!-- Built by JS --> </div>
+</div>
+
+<div id="channelselection" style="display: block">
+    <ul id="channellist"></ul>
+    <input id="newchannel" placeholder="Type new channel name">
+    <button id="create">Create</button>
+</div>
+
+<script src="js/chat.js"></script>
+</body>
+</html>
