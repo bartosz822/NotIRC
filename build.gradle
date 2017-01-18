@@ -23,10 +23,10 @@ dependencies {
 
 task stage(dependsOn: ['build', 'clean'])
 build.mustRunAfter clean
-stage.dependsOn(copyToLib)
 
 task copyToLib(type: Copy) {
     into "$buildDir/lib"
     from(configurations.compile)
 }
+stage.dependsOn(copyToLib)
 
