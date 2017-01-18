@@ -29,6 +29,8 @@ public class Chat {
 
     private static void initRoutes() {
 
+        port(80);
+
         webSocket("/chat", ChatWebSocketHandler.class);
 
 
