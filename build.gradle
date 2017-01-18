@@ -21,7 +21,16 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
 
-task stage(dependsOn: ['build', 'clean'])
+jar {
+    baseName = 'NotIrc'
+    version = '0.1.0'
+    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    manifest {
+        attributes 'Main-Class': 'Chat'
+    }
+}
+
+task stage(dependsOn: ['build', 'clean', 'jar'])
 build.mustRunAfter clean
 
 task copyToLib(type: Copy) {
