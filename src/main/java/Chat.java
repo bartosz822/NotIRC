@@ -29,7 +29,7 @@ public class Chat {
 
     private static void initRoutes() {
 
-        port(getHerokuAssignedPort() goi);
+        port(getHerokuAssignedPort());
 
         webSocket("/chat", ChatWebSocketHandler.class);
 
