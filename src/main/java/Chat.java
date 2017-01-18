@@ -29,7 +29,7 @@ public class Chat {
 
     private static void initRoutes() {
 
-        port(80);
+        port(getHerokuAssignedPort() goi);
 
         webSocket("/chat", ChatWebSocketHandler.class);
 
@@ -154,4 +154,13 @@ public class Chat {
                 .map(HttpCookie::getValue)
                 .reduce("",String::concat);
     }
+
+    static int getHerokuAssignedPort() {
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        if (processBuilder.environment().get("PORT") != null) {
+            return Integer.parseInt(processBuilder.environment().get("PORT"));
+        }
+        return 4567; //return default port if heroku-port isn't set (i.e. on localhost)
+    }
+
 }
