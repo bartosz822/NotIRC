@@ -1,3 +1,4 @@
+import groovy.lang.Singleton;
 import groovy.util.MapEntry;
 import org.eclipse.jetty.websocket.api.Session;
 import org.json.*;
@@ -14,6 +15,7 @@ import static spark.Spark.*;
 /**
  * Created by bartek on 1/14/17.
  */
+@Singleton
 public class Chat {
 
     // this map is shared between sessions and threads, so it needs to be thread-safe (http://stackoverflow.com/a/2688817)
@@ -96,15 +98,18 @@ public class Chat {
     }
 
     private static void clearChannels() {
-        channelNameChannelMap.entrySet().stream().filter(pair -> ! pair.getValue().hasUsers()).forEach(Chat::deleteChannel);
+        channelNameChannelMap
+                .entrySet()
+                .stream()
+                .filter(pair -> ! pair.getValue().hasUsers())
+                .forEach(Chat::deleteChannel);
         menuChannel.broadcastMessageOnChannel("Server", "");
     }
 
     private static void chanMsg(Session user, String message) {
         sessionChannelMap
                 .get(user)
-                .broadcastMessageOnChannel(userUsernameMap.
-                        get(user), message.substring(4, message.length()));
+                .broadcastMessageOnChannel(userUsernameMap.get(user), message.substring(4, message.length()));
     }
 
     private static void leaveChannel(Session user) {
@@ -120,7 +125,6 @@ public class Chat {
 
     private static void deleteChannel(Map.Entry<String, Channel> m) {
         channelNameChannelMap.remove(m.getKey());
-//        TODO MSG ALL
     }
 
     private static void joinChannel(Session user, String message) {
@@ -166,7 +170,6 @@ public class Chat {
         if (processBuilder.environment().get("PORT") != null) {
             return Integer.parseInt(processBuilder.environment().get("PORT"));
         }
-        return 4567; //return default port if heroku-port isn't set (i.e. on localhost)
+        return 4567; //return default port if heroku-port isn't set
     }
-
 }
