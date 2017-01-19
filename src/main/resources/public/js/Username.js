@@ -2,8 +2,8 @@
  * Created by bartek on 1/15/17.
  */
 id("save").addEventListener("click", function () {
-    document.cookie = "username=" + id("username").value();
-    location.href = "chat";
+        document.cookie = "username=" + id("username").value;
+        location.href = "chat";
 });
 
 

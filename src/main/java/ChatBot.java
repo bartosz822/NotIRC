@@ -1,4 +1,5 @@
 import org.apache.commons.io.IOUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -14,18 +15,25 @@ import static java.lang.Math.floor;
  * Created by bartek on 1/17/17.
  */
 public class ChatBot extends Channel {
-    private static String weatherApiUrl = "https://query.yahooapis.com/v1/public/yql?q=select%20item"+
+
+    private static final String weatherApiUrl = "https://query.yahooapis.com/v1/public/yql?q=select%20item"+
             ".condition%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places"+
             "(1)+%20where%20text%3D%22Cracow%22)&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
-
-    public ChatBot(String name) {
-        super(name);
-    }
 
     @Override
     public void broadcastMessageOnChannel(String sender, String message) {
         super.broadcastMessageOnChannel(sender, message);
         evalMsg(message);
+    }
+
+
+    @Override
+    public boolean hasUsers() {
+        return true;
+    }
+
+    public ChatBot(String name) {
+        super(name);
     }
 
     private void evalMsg(String msg) {
@@ -43,18 +51,22 @@ public class ChatBot extends Channel {
     }
 
     private void respondWithWeather() {
-            respondWithString("Już sprawdzam");
-        try ( InputStream in =
-                      new URL(weatherApiUrl).openStream()
+        respondWithString("Już sprawdzam");
+        try (InputStream in =
+                     new URL(weatherApiUrl).openStream()
         ) {
             JSONObject weather = new JSONObject(IOUtils.toString(in, "UTF-8"));
             JSONObject condition = weather.getJSONObject("query").getJSONObject("results").getJSONObject("channel").getJSONObject("item").getJSONObject("condition");
             String temp = condition.getString("temp");
             String desc = condition.getString("text");
 
-            respondWithString("Temperatura w Krakowie: " + convertToCelcius(temp) +"℃ opis pogody: " + desc);
-        } catch (Exception e) {
-            respondWithString("Nie można sprawdzić pogody");
+            respondWithString("Temperatura w Krakowie: " + convertToCelcius(temp) + "℃ opis pogody: " + desc);
+        }catch (JSONException e){
+            System.out.println("Api prawdopodobnie nie zadziałało");
+            respondWithString("Nie można sprawdzić pogody, spróbuj jeszcze raz");
+        }catch (Exception e) {
+            System.out.println(e.getMessage());
+            respondWithString("Nie można sprawdzić pogody, spróbuj jeszcze raz");
         }
 
 
@@ -100,4 +112,6 @@ public class ChatBot extends Channel {
     private void respondWithString(String message){
         super.broadcastMessageOnChannel("ChatBot", message);
     }
+
+
 }

@@ -13,11 +13,17 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by bartek on 1/14/17.
  */
 public class Channel {
+
     private Map<Session, String> sessionUsernameMap = new ConcurrentHashMap<>();
     private String name;
 
+
     public Channel(String name) {
         this.name = name;
+    }
+
+    public Map<Session, String> getSessionUsernameMap() {
+        return sessionUsernameMap;
     }
 
     public void addUser(Session user){
@@ -41,11 +47,13 @@ public class Channel {
                         .put("userlist", sessionUsernameMap.values())
                 ));
             } catch (JSONException | IOException e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
             }
      });
+    }
 
-
+    public boolean hasUsers(){
+        return sessionUsernameMap.keySet().stream().map(Session::isOpen).reduce(Boolean::logicalAnd).orElse(Boolean.FALSE);
     }
 
 

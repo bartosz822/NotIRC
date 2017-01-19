@@ -13,6 +13,7 @@ public class ChatWebSocketHandler {
     public void onConnect(Session user) throws Exception {
         String username = Chat.getUsername(user);
         Chat.userUsernameMap.put(user, username);
+        Chat.addNewUser(user);
         Chat.sendMessagToUser(user);
     }
 

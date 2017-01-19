@@ -7,33 +7,33 @@ webSocket.onmessage = function (msg) {
     updateChat(msg);
 };
 webSocket.onclose = function () {
-    alert("WebSocket connection closed")
+    alert("WebSocket connection closed");
+    location.href="/"
 };
 
 
 
-//Send message if "Send" is clicked
 id("send").addEventListener("click", function () {
     sendMessage("/msg" + id("message").value);
 });
-
 id("leave").addEventListener("click", function () {
     sendMessage("/leave");
-    location.href = "chat"
+    id("chat").innerHTML = "";
+    id("channel").style.display="none";
+    id("channelselection").style.display="block";
 });
-
-//Send message if enter is pressed in the input field
 id("message").addEventListener("keypress", function (e) {
     if (e.keyCode === 13) sendMessage("/msg" + e.target.value);
 });
-
 id("create").addEventListener("click", function () {
     if(id("newchannel").value!="") {
         webSocket.send("/create " + id("newchannel").value);
         id("newchannel").value = "";
     }
 });
-
+id("clear").addEventListener("click", function () {
+    webSocket.send("/clear");
+});
 id("newchannel").addEventListener("keypress", function (e) {
     if (e.keyCode === 13 && id("newchannel").value!="") {
         webSocket.send("/create " + e.target.value);
@@ -42,9 +42,6 @@ id("newchannel").addEventListener("keypress", function (e) {
 });
 
 
-
-
-//Send a message if it's not empty, then clear the input fieldto by
 function sendMessage(message) {
     if (message !== "") {
         webSocket.send(message);
@@ -52,7 +49,8 @@ function sendMessage(message) {
     }
 }
 
-//Update the chat-panel, and the list of connected users
+
+
 function updateChat(msg) {
     var data = JSON.parse(msg.data);
     if (data.channel === "true") {
@@ -71,13 +69,12 @@ function updateChat(msg) {
     }
 }
 
-
-
 function joinChannel(chan) {
     webSocket.send("/join " + chan);
     id("channelselection").style.display="none";
     id("channel").style.display="block"
 }
+
 //Helper function for inserting HTML as the first child of an element
 function insert(targetId, message) {
     id(targetId).insertAdjacentHTML("afterbegin", message);
