@@ -39,6 +39,7 @@ public class Channel {
     }
 
     public void broadcastMessageOnChannel(String sender, String message) {
+        cleanUserList();
         sessionUsernameMap.keySet().stream().filter(Session::isOpen).forEach(session -> {
             try {
                 session.getRemote().sendString(String.valueOf(new JSONObject()
@@ -50,6 +51,10 @@ public class Channel {
                 System.out.println(e.getMessage());
             }
      });
+    }
+
+    private void cleanUserList(){
+        sessionUsernameMap.keySet().stream().filter(user -> ! user.isOpen()).forEach(user->sessionUsernameMap.remove(user));
     }
 
     public boolean hasUsers(){

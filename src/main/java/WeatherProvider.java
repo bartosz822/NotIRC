@@ -21,7 +21,7 @@ public class WeatherProvider {
             String temp = weather.getJSONObject("main").getString("temp");
             String pressure = weather.getJSONObject("main").getString("pressure");
             String humidity = weather.getJSONObject("main").getString("humidity");
-            return "Temperatura: " + temp + " Ciśnienie: " + pressure + " Wilgotność powietrza " + humidity;
+            return "Temperatura: " + temp + "K Ciśnienie: " + pressure + "hPa Wilgotność powietrza " + humidity+ "%";
         }catch (JSONException e){
             System.out.println("Api prawdopodobnie nie zadziałało");
             return "Nie udało się sprawdzić pogody";
