@@ -16,9 +16,14 @@ public class Channel {
 
     private Map<Session, String> sessionUsernameMap = new ConcurrentHashMap<>();
     private String name;
+    private Chat chat;
 
+    public Chat getChat() {
+        return chat;
+    }
 
-    public Channel(String name) {
+    public Channel(String name, Chat chat) {
+        this.chat = chat;
         this.name = name;
     }
 
@@ -27,7 +32,7 @@ public class Channel {
     }
 
     public void addUser(Session user){
-        sessionUsernameMap.put(user, Chat.getUsername(user));
+        sessionUsernameMap.put(user, chat.getUsername(user));
     }
 
     public void removeUser(Session user){
@@ -44,7 +49,7 @@ public class Channel {
             try {
                 session.getRemote().sendString(String.valueOf(new JSONObject()
                         .put("channel", "true")
-                        .put("userMessage", Chat.createHtmlMessageFromSender(sender, message))
+                        .put("userMessage", chat.createHtmlMessageFromSender(sender, message))
                         .put("userlist", sessionUsernameMap.values())
                 ));
             } catch (JSONException | IOException e) {

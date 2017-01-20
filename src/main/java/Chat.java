@@ -18,51 +18,20 @@ import static spark.Spark.*;
 @Singleton
 public class Chat {
 
-    static Map<Session, String> userUsernameMap = new ConcurrentHashMap<>();
-    private static Map<String, Channel> channelNameChannelMap = new ConcurrentHashMap<>();
-    private static Map<Session, Channel> sessionChannelMap = new ConcurrentHashMap<>();
-    private static MenuChannel menuChannel = new MenuChannel("Menu");
+    Map<Session, String> userUsernameMap = new ConcurrentHashMap<>();
+    private  Map<String, Channel> channelNameChannelMap = new ConcurrentHashMap<>();
+    private  Map<Session, Channel> sessionChannelMap = new ConcurrentHashMap<>();
+    private  MenuChannel menuChannel = new MenuChannel("Menu", this);
 
 
-    public static void main(String[] args) {
-        channelNameChannelMap.put("chatbot", new ChatBot("chatbot"));
-        initRoutes();
-    }
-
-    private static void initRoutes() {
-        port(getHerokuAssignedPort());
-
-        webSocket("/chat", ChatWebSocketHandler.class);
-
-        before("/chat.html", (request, response) ->
-        {
-            if (request.cookie("username") == null)
-                response.redirect("/");
-        });
-
-        StaticFilesConfiguration staticHandler = new StaticFilesConfiguration();
-        staticHandler.configure("/public");
-        before((request, response) ->
-                staticHandler.consume(request.raw(), response.raw())
-        );
-
-        get("/chat", (request, response) -> {
-            if (request.cookie("username") == null) {
-                response.redirect("/");
-            } else {
-                response.redirect("/chat.html");
-            }
-            return null;
-        });
-
-    }
 
 
-    public static void sendMessagToUser(Session user) {
+
+    public void sendMessagToUser(Session user) {
         try {
             user.getRemote().sendString(String.valueOf(new JSONObject()
                     .put("channel", "false")
-                    .put("channellist", Chat.channelNameChannelMap.keySet())
+                    .put("channellist", channelNameChannelMap.keySet())
                     .put("userlist", userUsernameMap.values())
             ));
         } catch (Exception e) {
@@ -71,18 +40,23 @@ public class Chat {
     }
 
 
+    public Chat() {
+        channelNameChannelMap.put("chatbot", new ChatBot("chatbot", this));
+    }
+
     //Builds a HTML element with a sender-name, a message, and a timestamp,
-    public static String createHtmlMessageFromSender(String sender, String message) {
+    public  String createHtmlMessageFromSender(String sender, String message) {
         return article().with(
                 b(sender + " says:"),
                 p(message),
                 span().withClass("timestamp").withText(new SimpleDateFormat("HH:mm:ss").format(new Date()))
         ).render();
+
     }
 
 
     //    Evaluates message send through websocket
-    public static void evalMessage(Session user, String message) {
+    public void evalMessage(Session user, String message) {
         if (message.startsWith("/msg")) {
             chanMsg(user, message);
         } else if (message.startsWith("/join")) {
@@ -96,22 +70,22 @@ public class Chat {
         }
     }
 
-    private static void clearChannels() {
+    private void clearChannels() {
         channelNameChannelMap
                 .entrySet()
                 .stream()
                 .filter(pair -> ! pair.getValue().hasUsers())
-                .forEach(Chat::deleteChannel);
+                .forEach(this::deleteChannel);
         menuChannel.broadcastMessageOnChannel("Server", "");
     }
 
-    private static void chanMsg(Session user, String message) {
+    private void chanMsg(Session user, String message) {
         sessionChannelMap
                 .get(user)
                 .broadcastMessageOnChannel(userUsernameMap.get(user), message.substring(4, message.length()));
     }
 
-    private static void leaveChannel(Session user) {
+    private void leaveChannel(Session user) {
         Channel chan= sessionChannelMap.get(user);
         chan.removeUser(user);
         chan.broadcastMessageOnChannel("Server", "User: " + userUsernameMap.get(user) + " left the channel" );
@@ -122,11 +96,11 @@ public class Chat {
         System.out.println("wywalam go");
     }
 
-    private static void deleteChannel(Map.Entry<String, Channel> m) {
+    private void deleteChannel(Map.Entry<String, Channel> m) {
         channelNameChannelMap.remove(m.getKey());
     }
 
-    private static void joinChannel(Session user, String message) {
+    private void joinChannel(Session user, String message) {
         String chanelName = getChannelName(message.substring(5, message.length()));
         Channel chan = channelNameChannelMap.get(chanelName);
         chan.addUser(user);
@@ -135,22 +109,22 @@ public class Chat {
         sessionChannelMap.put(user, channelNameChannelMap.get(chanelName));
     }
 
-    private static void createChannel(Session user, String message) {
+    private void createChannel(Session user, String message) {
         String chanelName = getChannelName(message.substring(7, message.length()));
         if (!channelNameChannelMap.containsKey(chanelName))
-            channelNameChannelMap.put(chanelName, new Channel(chanelName));
+            channelNameChannelMap.put(chanelName, new Channel(chanelName, this));
         sendMessagToUser(user);
         menuChannel.broadcastMessageOnChannel("Server", "");
     }
 
-    private static String getChannelName(String message) {
+    private String getChannelName(String message) {
         if (message.startsWith(" ")) {
             return message.substring(1, message.length());
         } else
             return message;
     }
 
-    public static String getUsername(Session user) {
+    public String getUsername(Session user) {
         return user
                 .getUpgradeRequest()
                 .getCookies()
@@ -160,15 +134,9 @@ public class Chat {
                 .reduce("",String::concat);
     }
 
-    public static void addNewUser(Session user){
+    public void addNewUser(Session user){
         menuChannel.addUser(user);
     }
 
-    static int getHerokuAssignedPort() {
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        if (processBuilder.environment().get("PORT") != null) {
-            return Integer.parseInt(processBuilder.environment().get("PORT"));
-        }
-        return 4567; //return default port if heroku-port isn't set
-    }
+
 }

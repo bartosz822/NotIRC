@@ -18,8 +18,8 @@ public class ChatBot extends Channel {
 
     private WeatherProvider weatherProvider;
 
-    public ChatBot(String name) {
-        super(name);
+    public ChatBot(String name, Chat chat) {
+        super(name, chat);
         this.weatherProvider = new WeatherProvider();
     }
 
