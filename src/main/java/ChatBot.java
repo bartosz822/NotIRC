@@ -16,9 +16,17 @@ import static java.lang.Math.floor;
  */
 public class ChatBot extends Channel {
 
+    private WeatherProvider weatherProvider;
+
+    public ChatBot(String name) {
+        super(name);
+        this.weatherProvider = new WeatherProvider();
+    }
+
     private static final String weatherApiUrl = "https://query.yahooapis.com/v1/public/yql?q=select%20item"+
             ".condition%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places"+
             "(1)+%20where%20text%3D%22Cracow%22)&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
+
 
     @Override
     public void broadcastMessageOnChannel(String sender, String message) {
@@ -32,9 +40,6 @@ public class ChatBot extends Channel {
         return true;
     }
 
-    public ChatBot(String name) {
-        super(name);
-    }
 
     private void evalMsg(String msg) {
         switch (msg) {
@@ -52,30 +57,7 @@ public class ChatBot extends Channel {
 
     private void respondWithWeather() {
         respondWithString("Już sprawdzam");
-        try (InputStream in =
-                     new URL(weatherApiUrl).openStream()
-        ) {
-            JSONObject weather = new JSONObject(IOUtils.toString(in, "UTF-8"));
-            JSONObject condition = weather.getJSONObject("query").getJSONObject("results").getJSONObject("channel").getJSONObject("item").getJSONObject("condition");
-            String temp = condition.getString("temp");
-            String desc = condition.getString("text");
-
-            respondWithString("Temperatura w Krakowie: " + convertToCelcius(temp) + "℃ opis pogody: " + desc);
-        }catch (JSONException e){
-            System.out.println("Api prawdopodobnie nie zadziałało");
-            respondWithString("Nie można sprawdzić pogody, spróbuj jeszcze raz");
-        }catch (Exception e) {
-            System.out.println(e.getMessage());
-            respondWithString("Nie można sprawdzić pogody, spróbuj jeszcze raz");
-        }
-
-
-    }
-
-    private String convertToCelcius(String temp) {
-        Integer tmp = Integer.parseInt(temp);
-        double celc = (tmp - 32) / 1.8;
-        return Double.toString(floor(celc));
+        respondWithString(weatherProvider.getCurrentWeather());
     }
 
     private void respondWithDay() {

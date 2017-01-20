@@ -18,7 +18,6 @@ import static spark.Spark.*;
 @Singleton
 public class Chat {
 
-    // this map is shared between sessions and threads, so it needs to be thread-safe (http://stackoverflow.com/a/2688817)
     static Map<Session, String> userUsernameMap = new ConcurrentHashMap<>();
     private static Map<String, Channel> channelNameChannelMap = new ConcurrentHashMap<>();
     private static Map<Session, Channel> sessionChannelMap = new ConcurrentHashMap<>();
