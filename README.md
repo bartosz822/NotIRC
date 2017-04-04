@@ -1,2 +1,2 @@
 # NotIRC
-## simple webchat based on websockets for Object Programming course on AGH UST
+### simple webchat based on websockets for object-oriented programming course on AGH UST
